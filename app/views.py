@@ -1,11 +1,12 @@
+import datetime
 from functools import wraps
 
-from flask import render_template, flash, redirect, url_for, session
+from flask import render_template, flash, redirect, url_for, session, request
 from passlib.handlers.sha2_crypt import sha256_crypt
 
 from app import app, db
-from app.forms import RegisterForm, LoginForm, PostForm
-from app.models import User, Post
+from app.forms import RegisterForm, LoginForm, PostForm, CommentForm
+from app.models import User, Post, Comment
 
 
 # Check if user logged in
@@ -35,7 +36,11 @@ def about():
 @app.route('/posts')
 @is_logged_in
 def posts():
-    posts = Post.query.all()
+    search = request.args.get('search')
+    if search is not None and len(search) > 2:
+        posts = Post.query.filter(Post.title.like("%{0}%".format(search))).all()
+    else:
+        posts = Post.query.all()
     if len(posts) < 1:
         return render_template('posts.html', msg='Not Found')
     return render_template('posts.html', posts=posts)
@@ -56,11 +61,18 @@ def add_post():
     return render_template('add_post.html', form=form)
 
 
-@app.route('/post/<string:id>/')
+@app.route('/post/<string:id>/', methods=['GET', 'POST'])
 @is_logged_in
 def post(id):
+    form = CommentForm()
+    if form.validate_on_submit():
+        comment = Comment(text=form.text.data, timestamp=datetime.datetime.utcnow(), user_id=1, post_id=id)
+        db.session.add(comment)
+        db.session.commit()
+        flash('Comment Added', 'success')
+
     post = Post.query.get(id)
-    return render_template('post.html', post=post)
+    return render_template('post.html', post=post, form=form)
 
 
 @app.route('/edit_post/<string:id>/', methods=['GET', 'POST'])

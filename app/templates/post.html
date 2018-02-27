@@ -2,8 +2,32 @@
 
 {% block body %}
     <h1>{{ post.title }}</h1>
+    {% from "includes/_formhelpers.html" import render_field %}
     <small>Written by {{ post.author.username }}</small>
     <div>
         <h1>{{ post.body | safe }}</h1>
     </div>
+    <table class="table table-striped">
+        <tr>
+            <th>Comment №</th>
+            <th>Author</th>
+            <th>Added at</th>
+            <th>Comment</th>
+        </tr>
+        {% for comment in post.comments %}
+            <tr>
+                <td>{{ comment.id }}</td>
+                <td>{{ comment.author.username }}</td>
+                <td>{{ comment.timestamp }}</td>
+                <td>{{ comment.text | safe }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    <form method="POST" action="">
+        {{ form.csrf_token }}
+        <div class="form-group">
+            {{ render_field(form.text, class_="form-control") }}
+        </div>
+        <p><input class="btn btn-primary" type="submit" value="Submit">
+    </form>
 {% endblock %}

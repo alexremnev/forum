@@ -9,5 +9,5 @@ with app.app_context():
     # don't tuch import below!!!
     from app import models
 
-    alembic.revision('create posts and comments')
+    alembic.revision('add timestamp to comment')
     alembic.upgrade()
