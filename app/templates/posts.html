@@ -1,7 +1,30 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-    <div class="jumbotron text-center">
-        <h1> this should be articles</h1>
-    </div>
+    <h1> Dashboard</h1>
+    <table class="table table-striped">
+        <tr>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Article</th>
+            <th></th>
+            <th></th>
+        </tr>
+        {% for post in posts %}
+            <tr>
+                <td><a href="post/{{ post.id }}">{{ post.title }}</a></td>
+                <td>{{ post.author.username }}</td>
+                <td>{{ post.body | safe }}</td>
+                <td><a href="edit_post/{{ post.id }}" class="btn btn-default pull-right">Edit</a></td>
+                <td>
+                    <form action="{{ url_for('delete_post', id=post.id) }}" method="post">
+                        <input type="hidden" name="_method" value="DELETE">
+                        <input type="submit" value="Delete" class="btn btn-danger">
+                    </form>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    <a class="btn btn-success" href="/add_post">Add Post</a>
 {% endblock %}

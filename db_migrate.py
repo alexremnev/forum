@@ -9,5 +9,5 @@ with app.app_context():
     # don't tuch import below!!!
     from app import models
 
-    alembic.revision('create users')
+    alembic.revision('create posts and comments')
     alembic.upgrade()

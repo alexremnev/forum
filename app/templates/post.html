@@ -1,0 +1,9 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+    <h1>{{ post.title }}</h1>
+    <small>Written by {{ post.author.username }}</small>
+    <div>
+        <h1>{{ post.body | safe }}</h1>
+    </div>
+{% endblock %}

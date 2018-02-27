@@ -9,6 +9,8 @@ class User(db.Model, UserMixin):
     username = Column(String(30), unique=True)
     email = Column(String(50), unique=True)
     password = Column(String(100))
+    posts = db.relationship('Post', backref='author', lazy='dynamic')
+    comments = db.relationship('Comment', backref='author', lazy='dynamic')
 
     @property
     def is_authenticated(self):
@@ -27,3 +29,18 @@ class User(db.Model, UserMixin):
 
     def __repr__(self):
         return '<User %r>' % self.username
+
+
+class Post(db.Model):
+    id = Column(Integer, primary_key=True)
+    title = Column(String(50), unique=True)
+    body = Column(String)
+    user_id = Column(Integer, db.ForeignKey('user.id'))
+    comments = db.relationship('Comment', backref='post', lazy='dynamic')
+
+
+class Comment(db.Model):
+    id = Column(Integer, primary_key=True)
+    text = Column(String)
+    user_id = Column(Integer, db.ForeignKey('user.id'))
+    post_id = Column(Integer, db.ForeignKey('post.id'))

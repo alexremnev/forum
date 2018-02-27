@@ -4,8 +4,8 @@ from flask import render_template, flash, redirect, url_for, session
 from passlib.handlers.sha2_crypt import sha256_crypt
 
 from app import app, db
-from app.forms import RegisterForm, LoginForm
-from app.models import User
+from app.forms import RegisterForm, LoginForm, PostForm
+from app.models import User, Post
 
 
 # Check if user logged in
@@ -35,7 +35,59 @@ def about():
 @app.route('/posts')
 @is_logged_in
 def posts():
-    return render_template('posts.html')
+    posts = Post.query.all()
+    if len(posts) < 1:
+        return render_template('posts.html', msg='Not Found')
+    return render_template('posts.html', posts=posts)
+
+
+@app.route('/add_post', methods=['GET', 'POST'])
+@is_logged_in
+def add_post():
+    form = PostForm()
+    if form.validate_on_submit():
+        title = form.title.data
+        body = form.body.data
+        user = User.query.get(1)
+        post = Post(title=title, body=body, author=user)
+        db.session.add(post)
+        db.session.commit()
+        return redirect(url_for('posts'))
+    return render_template('add_post.html', form=form)
+
+
+@app.route('/post/<string:id>/')
+@is_logged_in
+def post(id):
+    post = Post.query.get(id)
+    return render_template('post.html', post=post)
+
+
+@app.route('/edit_post/<string:id>/', methods=['GET', 'POST'])
+@is_logged_in
+def edit_post(id):
+    form = PostForm()
+    post = Post.query.get(id)
+    if form.validate_on_submit():
+        # todo doesn't work!
+        # post.title = form.title.data,
+        # post.body = form.body.data,
+        db.session.query(Post).filter_by(id=id).update({'title': form.title.data, 'body': form.body.data, 'user_id': 1})
+        db.session.commit()
+        flash('Post Updated', 'success')
+        return redirect(url_for('posts'))
+    form.title.data = post.title
+    form.body.data = post.body
+    return render_template('edit_post.html', form=form)
+
+
+@app.route('/delete_post/<string:id>/', methods=['POST'])
+@is_logged_in
+def delete_post(id):
+    db.session.query(Post).filter_by(id=id).delete()
+    db.session.commit()
+    flash('Post Removed', 'success')
+    return redirect(url_for('posts'))
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -47,7 +99,6 @@ def register():
         db.session.add(new_user)
         db.session.commit()
         session['logged_in'] = True
-        session['']
         flash('You are now registered', 'success')
         return redirect(url_for('index'))
     return render_template('register.html', form=form)
