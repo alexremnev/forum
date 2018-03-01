@@ -23,11 +23,13 @@
             </tr>
         {% endfor %}
     </table>
-    <form method="POST" action="">
-        {{ form.csrf_token }}
-        <div class="form-group">
-            {{ render_field(form.text, class_="form-control") }}
-        </div>
-        <p><input class="btn btn-primary" type="submit" value="Submit">
-    </form>
+    {% if  not current_user.is_anonymous %}
+        <form method="POST" action="">
+            {{ form.csrf_token }}
+            <div class="form-group">
+                {{ render_field(form.text, class_="form-control") }}
+            </div>
+            <p><input class="btn btn-primary" type="submit" value="Submit">
+        </form>
+    {% endif %}
 {% endblock %}

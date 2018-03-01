@@ -1,25 +1,37 @@
 import datetime
 from functools import wraps
 
-from flask import render_template, flash, redirect, url_for, session, request
+from flask import render_template, flash, redirect, url_for, request
 from passlib.handlers.sha2_crypt import sha256_crypt
+from flask_login import current_user, login_user, logout_user, login_required
+from werkzeug.urls import url_parse
 
-from app import app, db
+from app import app, db, login
 from app.forms import RegisterForm, LoginForm, PostForm, CommentForm
-from app.models import User, Post, Comment
+from app.models import User, Post, Comment, Role
 
 
-# Check if user logged in
-def is_logged_in(f):
-    @wraps(f)
-    def wrap(*args, **kwargs):
-        if 'logged_in' in session:
+def required_roles(*roles):
+    def wrapper(f):
+        @wraps(f)
+        def wrapped(*args, **kwargs):
+            if not bool(set(get_current_user_role()) & set(roles)):
+                flash('Authentication error, please check your details and try again', 'error')
+                return redirect(url_for('index'))
             return f(*args, **kwargs)
-        else:
-            flash('Unauthorized, Please login', 'danger')
-            return redirect(url_for('login'))
 
-    return wrap
+        return wrapped
+
+    return wrapper
+
+
+def get_current_user_role():
+    return current_user.roles
+
+
+@login.user_loader
+def load_user(id):
+    return User.query.get(int(id))
 
 
 @app.route('/')
@@ -34,7 +46,6 @@ def about():
 
 
 @app.route('/posts')
-@is_logged_in
 def posts():
     search = request.args.get('search')
     if search is not None and len(search) > 2:
@@ -47,14 +58,13 @@ def posts():
 
 
 @app.route('/add_post', methods=['GET', 'POST'])
-@is_logged_in
+@login_required
 def add_post():
     form = PostForm()
     if form.validate_on_submit():
         title = form.title.data
         body = form.body.data
-        user = User.query.get(1)
-        post = Post(title=title, body=body, author=user)
+        post = Post(title=title, body=body, author=current_user)
         db.session.add(post)
         db.session.commit()
         return redirect(url_for('posts'))
@@ -62,11 +72,11 @@ def add_post():
 
 
 @app.route('/post/<string:id>/', methods=['GET', 'POST'])
-@is_logged_in
 def post(id):
     form = CommentForm()
     if form.validate_on_submit():
-        comment = Comment(text=form.text.data, timestamp=datetime.datetime.utcnow(), user_id=1, post_id=id)
+        comment = Comment(text=form.text.data, timestamp=datetime.datetime.utcnow(), user_id=current_user.id,
+                          post_id=id)
         db.session.add(comment)
         db.session.commit()
         flash('Comment Added', 'success')
@@ -76,7 +86,7 @@ def post(id):
 
 
 @app.route('/edit_post/<string:id>/', methods=['GET', 'POST'])
-@is_logged_in
+@login_required
 def edit_post(id):
     form = PostForm()
     post = Post.query.get(id)
@@ -84,7 +94,8 @@ def edit_post(id):
         # todo doesn't work!
         # post.title = form.title.data,
         # post.body = form.body.data,
-        db.session.query(Post).filter_by(id=id).update({'title': form.title.data, 'body': form.body.data, 'user_id': 1})
+        db.session.query(Post).filter_by(id=id).update(
+            {'title': form.title.data, 'body': form.body.data, 'user_id': current_user.id})
         db.session.commit()
         flash('Post Updated', 'success')
         return redirect(url_for('posts'))
@@ -94,7 +105,7 @@ def edit_post(id):
 
 
 @app.route('/delete_post/<string:id>/', methods=['POST'])
-@is_logged_in
+@required_roles('moderator', 'admin')
 def delete_post(id):
     db.session.query(Post).filter_by(id=id).delete()
     db.session.commit()
@@ -106,11 +117,12 @@ def delete_post(id):
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
+        user_role = Role.query.filter_by(name='user').first()
         new_user = User(username=form.username.data, email=form.email.data,
-                        password=(sha256_crypt.encrypt(form.password.data)))
+                        password=(sha256_crypt.encrypt(form.password.data)), roles=[user_role])
         db.session.add(new_user)
         db.session.commit()
-        session['logged_in'] = True
+        login_user(new_user)
         flash('You are now registered', 'success')
         return redirect(url_for('index'))
     return render_template('register.html', form=form)
@@ -124,16 +136,20 @@ def login():
         user = User.query.filter_by(username=form.username.data).first()
         if user:
             if sha256_crypt.verify(form.password.data, user.password):
-                session['logged_in'] = True
+                login_user(user, remember=form.remember.data)
                 flash('You were successfully logged in', 'success')
-                return redirect(url_for('index'))
+                next_page = request.args.get('next')
+                if not next_page or url_parse(next_page).netloc != '':
+                    next_page = url_for('index')
+                return redirect(next_page)
         else:
             error = 'Invalid username or password'
     return render_template('login.html', form=form, error=error)
 
 
 @app.route('/logout')
+@login_required
 def logout():
-    session.clear()
+    logout_user()
     flash('You are now logged out', 'success')
     return redirect(url_for('login'))

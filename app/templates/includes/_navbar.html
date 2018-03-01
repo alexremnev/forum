@@ -14,20 +14,20 @@
                 <a class="nav-link disabled" href="/posts">Dashboard</a>
             </li>
         </ul>
-        <form class="form-inline my-2 my-lg-0" method="get">
+        <form class="form-inline my-2 my-lg-0" method="get" action="/posts">
             <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search" name="search">
             <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
         </form>
-        {% if session.logged_in %}
-            <ul class="nav nav-bar nav-bar-right">
-                <li class="nav-item"><a class="nav-link" href="logout">Logout</a></li>
-            </ul>
-        {% else %}
+        {% if current_user.is_anonymous %}
             <ul class="nav nav-bar nav-bar-right">
                 <li class="nav-item"><a class="nav-link" href="/register">Register</a></li>
             </ul>
             <ul class="nav nav-bar nav-bar-right">
-                <li class="nav-item"><a class="nav-link" href="login">Login</a></li>
+                <li class="nav-item"><a class="nav-link" href="/login">Login</a></li>
+            </ul>
+        {% else %}
+            <ul class="nav nav-bar nav-bar-right">
+                <li class="nav-item"><a class="nav-link" href="/logout">Logout</a></li>
             </ul>
         {% endif %}
     </div>
