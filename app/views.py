@@ -8,7 +8,7 @@ from werkzeug.urls import url_parse
 
 from app import app, db, login
 from app.forms import RegisterForm, LoginForm, PostForm, CommentForm
-from app.models import User, Post, Comment, Role
+from app.models import User, Post, Comment, Role, RolesUsers
 
 
 def required_roles(*roles):
@@ -145,6 +145,37 @@ def login():
         else:
             error = 'Invalid username or password'
     return render_template('login.html', form=form, error=error)
+
+
+@app.route('/admin', methods=['GET', 'POST'])
+@required_roles('admin')
+def admin():
+    users = User.query.all()
+    roles = Role.query.all()
+    return render_template('admin.html', users=users, roles=roles)
+
+
+@app.route('/unassign/<string:id>/', methods=['GET', 'POST'])
+@required_roles('admin')
+def unassign(id):
+    role_id = request.form.get('unassign')
+    role_to_del = Role.query.get(role_id)
+    user = User.query.get(id)
+    user.roles.remove(role_to_del)
+    db.session.commit()
+    flash('Role removed', 'success')
+    return redirect(url_for('admin'))
+
+
+@app.route('/assign/<string:id>/', methods=['GET', 'POST'])
+@required_roles('admin')
+def assign(id):
+    role_id = request.form.get('assign')
+    user_role = RolesUsers(user_id=id, role_id=role_id)
+    db.session.add(user_role)
+    db.session.commit()
+    flash('Role added', 'success')
+    return redirect(url_for('admin'))
 
 
 @app.route('/logout')

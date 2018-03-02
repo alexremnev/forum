@@ -1,0 +1,48 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+    <h1> Admin Panel</h1>
+    <table class="table table-striped">
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Posts</th>
+            <th>Comments</th>
+            <th>User roles</th>
+            <th>All roles</th>
+            <th></th>
+        </tr>
+        {% for user in users %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.username }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.posts.count() }}</td>
+                <td>{{ user.comments.count() }}</td>
+                <td>
+                    <form class="form-inline" method="POST" action="{{ url_for('unassign', id =user.id) }}">
+                        <select class="form-control" name="unassign" method="POST" action="">
+                            <option value="{{ user.roles[0].id }}" selected>{{ user.roles[0].name }}</option>
+                            {% for role in user.roles[1:] %}
+                                <option value="{{ role.id }}">{{ role.name }}</option>"
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-success">Unassign</button>
+                    </form>
+                </td>
+                <td>
+                    <form class="form-inline" method="POST" action="{{ url_for('assign', id =user.id) }}">
+                        <select class="form-control" name="assign" method="POST" action="">
+                            <option value="{{ roles[0].id }}" selected>{{ roles[0].name }}</option>
+                            {% for role in roles[1:] %}
+                                <option value="{{ role.id }}">{{ role.name }}</option>"
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-success">Assign</button>
+                    </form>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

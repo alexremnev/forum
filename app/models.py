@@ -33,6 +33,10 @@ class User(db.Model, UserMixin):
     def is_in_roles(self, *roles):
         return set(self.roles) & set(roles)
 
+    @property
+    def is_admin(self):
+        return 'admin' in self.roles
+
 
 class Post(db.Model):
     id = Column(Integer, primary_key=True)
@@ -73,3 +77,7 @@ class Anonymous(AnonymousUserMixin):
     @property
     def is_anonymous(self):
         return True
+
+    @property
+    def is_admin(self):
+        return False
