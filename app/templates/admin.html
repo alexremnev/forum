@@ -5,6 +5,7 @@
     <table class="table table-striped">
         <tr>
             <th>Id</th>
+            <th>Avatar</th>
             <th>Name</th>
             <th>Email</th>
             <th>Posts</th>
@@ -16,13 +17,14 @@
         {% for user in users %}
             <tr>
                 <td>{{ user.id }}</td>
+                <td><img src="{{ user.avatar(36) }}"></td>
                 <td>{{ user.username }}</td>
                 <td>{{ user.email }}</td>
                 <td>{{ user.posts.count() }}</td>
                 <td>{{ user.comments.count() }}</td>
                 <td>
                     <form class="form-inline" method="POST" action="{{ url_for('unassign', id =user.id) }}">
-                        <select class="form-control" name="unassign" method="POST" action="">
+                        <select class="form-control" name="unassign" method="POST" action="" style="width: 100px">
                             <option value="{{ user.roles[0].id }}" selected>{{ user.roles[0].name }}</option>
                             {% for role in user.roles[1:] %}
                                 <option value="{{ role.id }}">{{ role.name }}</option>"

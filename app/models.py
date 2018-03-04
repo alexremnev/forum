@@ -2,6 +2,7 @@ from flask_login import AnonymousUserMixin
 from flask_security import UserMixin, RoleMixin
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import backref
+from hashlib import md5
 
 from app import db
 
@@ -36,6 +37,11 @@ class User(db.Model, UserMixin):
     @property
     def is_admin(self):
         return 'admin' in self.roles
+
+    def avatar(self, size):
+        digest = md5(self.email.lower().encode('utf-8')).hexdigest()
+        return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
+            digest, size)
 
 
 class Post(db.Model):

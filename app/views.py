@@ -178,6 +178,14 @@ def assign(id):
     return redirect(url_for('admin'))
 
 
+@app.route('/user/<username>')
+@login_required
+def user(username):
+    user = User.query.filter_by(username=username).first_or_404()
+    posts = Post.query.filter_by(author=user).all()
+    return render_template('user.html', user=user, posts=posts)
+
+
 @app.route('/logout')
 @login_required
 def logout():
