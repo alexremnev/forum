@@ -12,4 +12,4 @@ login.login_view = 'login'
 from app.models import Anonymous
 login.anonymous_user = Anonymous
 
-from app import views
+from app import views, models, errors
