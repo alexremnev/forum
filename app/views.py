@@ -2,8 +2,8 @@ import datetime
 from functools import wraps
 
 from flask import render_template, flash, redirect, url_for, request
-from passlib.handlers.sha2_crypt import sha256_crypt
 from flask_login import current_user, login_user, logout_user, login_required
+from passlib.handlers.sha2_crypt import sha256_crypt
 from werkzeug.urls import url_parse
 
 from app import app, db, login
@@ -48,10 +48,10 @@ def about():
 @app.route('/posts')
 def posts():
     search = request.args.get('search')
+    query = Post.query
     if search is not None and len(search) > 2:
-        posts = Post.query.filter(Post.title.like("%{0}%".format(search))).all()
-    else:
-        posts = Post.query.all()
+        query = query.filter(Post.title.like("%{0}%".format(search)))
+    posts = query.all()
     if len(posts) < 1:
         return render_template('posts.html', msg='Not Found')
     return render_template('posts.html', posts=posts)
@@ -160,10 +160,12 @@ def admin():
 def unassign(id):
     role_id = request.form.get('unassign')
     role_to_del = Role.query.get(role_id)
-    user = User.query.get(id)
-    user.roles.remove(role_to_del)
-    db.session.commit()
-    flash('Role removed', 'success')
+    user_role = Role.query.filter_by(name='user').first()
+    if role_to_del is not user_role:
+        user = User.query.get(id)
+        user.roles.remove(role_to_del)
+        db.session.commit()
+        flash('Role removed', 'success')
     return redirect(url_for('admin'))
 
 
