@@ -10,7 +10,7 @@
             <th>Email</th>
             <th>Posts</th>
             <th>Comments</th>
-            <th>User roles</th>
+            <th>Current roles</th>
             <th>All roles</th>
             <th></th>
         </tr>
@@ -22,17 +22,7 @@
                 <td>{{ user.email }}</td>
                 <td>{{ user.posts.count() }}</td>
                 <td>{{ user.comments.count() }}</td>
-                <td>
-                    <form class="form-inline" method="POST" action="{{ url_for('unassign', id =user.id) }}">
-                        <select class="form-control" name="unassign" method="POST" action="" style="width: 100px">
-                            <option value="{{ user.roles[0].id }}" selected>{{ user.roles[0].name }}</option>
-                            {% for role in user.roles[1:] %}
-                                <option value="{{ role.id }}">{{ role.name }}</option>"
-                            {% endfor %}
-                        </select>
-                        <button type="submit" class="btn btn-success">Unassign</button>
-                    </form>
-                </td>
+                <td>{{ user.role.name }}</td>
                 <td>
                     <form class="form-inline" method="POST" action="{{ url_for('assign', id =user.id) }}">
                         <select class="form-control" name="assign" method="POST" action="">

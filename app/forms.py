@@ -13,7 +13,8 @@ class LoginForm(FlaskForm):
 
 class RegisterForm(FlaskForm):
     username = StringField('username', validators=[InputRequired(), DataRequired(), Length(min=1, max=30)])
-    email = StringField('email', validators=[InputRequired(), DataRequired(), Email(message='Invalid email'), Length(max=50)])
+    email = StringField('email',
+                        validators=[InputRequired(), DataRequired(), Email(message='Invalid email'), Length(max=50)])
     password = PasswordField('password', validators=[InputRequired(), Length(min=3, max=100)])
 
     def validate(self):
@@ -34,19 +35,8 @@ class RegisterForm(FlaskForm):
 
 
 class PostForm(FlaskForm):
-    title = StringField('title', validators=[InputRequired(), DataRequired(), Length(min=1, max=50)])
+    title = StringField('title', validators=[InputRequired(), Length(min=1, max=50)])
     body = TextAreaField('body', validators=[InputRequired(), Length(max=5000)])
-
-    def validate(self):
-        form = FlaskForm.validate(self)
-        if not form:
-            return False
-
-        post = Post.query.filter_by(title=self.title.data).first()
-        if post is not None:
-            self.title.errors.append('Title already exists')
-            return False
-        return True
 
 
 class CommentForm(FlaskForm):
