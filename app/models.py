@@ -29,9 +29,6 @@ class User(db.Model, UserMixin):
     def __repr__(self):
         return '<User %r>' % self.username
 
-    def is_admin(self):
-        return self.can(Permission.ADMINISTER)
-
     def avatar(self, size):
         digest = md5(self.email.lower().encode('utf-8')).hexdigest()
         return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
@@ -77,8 +74,9 @@ class Permission(db.Model):
 
 class AnonymousUser(AnonymousUserMixin):
 
-    @staticmethod
-    def has_permission(permission_name):
-        from app.Permission import anonymous_role
-        role = Role.query.filter_by(name=anonymous_role.name).first()
-        return [perm for perm in role.permissions if perm.name == permission_name]
+    def __init__(self):
+            from app.Permission import anonymous_role
+            self.role = Role.query.filter_by(name=anonymous_role.name).first()
+
+    def has_permission(self, permission_name):
+        return [perm for perm in self.role.permissions if perm.name == permission_name]
