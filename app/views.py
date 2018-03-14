@@ -1,12 +1,11 @@
 import datetime
 
 from flask import render_template, flash, redirect, url_for, request
-from flask_login import current_user, login_user, logout_user, login_required
+from flask_login import current_user, login_user, logout_user
 from werkzeug.urls import url_parse
 
 from app import app, db
-from app.Permission import Permission
-from app.business import encrypt_password, verify_password, permission_required, admin_required, is_unique_post_title
+from app.business import encrypt_password, verify_password, permission_required, is_unique_post_title
 from app.forms import RegisterForm, LoginForm, PostForm, CommentForm
 from app.models import User, Post, Comment, Role
 
@@ -31,11 +30,11 @@ def posts():
     posts = query.all()
     if len(posts) < 1:
         return render_template('posts.html', msg='Not Found')
-    return render_template('posts.html', posts=posts, Permission=Permission)
+    return render_template('posts.html', posts=posts)
 
 
 @app.route('/add_post', methods=['GET', 'POST'])
-@login_required
+@permission_required('add_post')
 def add_post():
     form = PostForm()
     error = None
@@ -66,9 +65,10 @@ def post(id):
 
 
 @app.route('/edit_post/<string:id>/', methods=['GET', 'POST'])
-@login_required
+@permission_required('edit_post')
 def edit_post(id):
-    if [post.id for post in current_user.posts if str(post.id) == id] or current_user.can(Permission.MODERATE_COMMENTS):
+    if (Post.query.filter_by(id=id, user_id=current_user.id).first() is not None) or current_user.role.name in ['admin',
+                                                                                                                'moderator']:
         form = PostForm()
         post = Post.query.get(id)
         if form.validate_on_submit():
@@ -85,7 +85,7 @@ def edit_post(id):
 
 
 @app.route('/delete_post/<string:id>/', methods=['POST'])
-@permission_required(Permission.MODERATE_COMMENTS)
+@permission_required('delete_post')
 def delete_post(id):
     db.session.query(Post).filter_by(id=id).delete()
     db.session.commit()
@@ -128,7 +128,7 @@ def login():
 
 
 @app.route('/admin', methods=['GET', 'POST'])
-@admin_required
+@permission_required('admin')
 def admin():
     users = User.query.all()
     roles = Role.query.all()
@@ -136,7 +136,7 @@ def admin():
 
 
 @app.route('/assign/<string:id>/', methods=['GET', 'POST'])
-@admin_required
+@permission_required('admin')
 def assign(id):
     role_id = request.form.get('assign')
     db.session.query(User).filter_by(id=id).update({'role_id': role_id})
@@ -146,7 +146,7 @@ def assign(id):
 
 
 @app.route('/profile/<username>')
-@login_required
+@permission_required('profile')
 def profile(username):
     user = User.query.filter_by(username=username).first_or_404()
     posts = Post.query.filter_by(author=user).all()
@@ -154,7 +154,7 @@ def profile(username):
 
 
 @app.route('/logout')
-@login_required
+@permission_required('logout')
 def logout():
     logout_user()
     flash('You are now logged out', 'success')

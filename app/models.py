@@ -4,7 +4,6 @@ from sqlalchemy import Column, Integer, String, DateTime
 from hashlib import md5
 
 from app import db
-from app.Permission import Permission
 
 
 class User(db.Model, UserMixin):
@@ -21,10 +20,8 @@ class User(db.Model, UserMixin):
     def is_active(self):
         return True
 
-    def can(self, permissions):
-        b = self.role.permissions
-        a = self.role is not None and (self.role.permissions & permissions) == permissions
-        return a
+    def has_permission(self, permission_name):
+        return [perm for perm in self.role.permissions if perm.name == permission_name]
 
     def get_id(self):
         return str(self.id)
@@ -57,17 +54,31 @@ class Comment(db.Model):
     post_id = Column(Integer, db.ForeignKey('post.id'))
 
 
+role_permission = db.Table('role_permission',
+                           Column('role_id', Integer, db.ForeignKey('role.id')),
+                           Column('permission_id', Integer, db.ForeignKey('permission.id')))
+
+
 class Role(db.Model, RoleMixin):
-    id = Column(Integer(), primary_key=True)
-    name = Column(String(80), unique=True)
-    permissions = Column(Integer)
+    id = Column(Integer, primary_key=True)
+    name = Column(String(80))
+    permissions = db.relationship('Permission', secondary=role_permission, back_populates='roles')
     users = db.relationship('User', back_populates='role')
 
 
+class Permission(db.Model):
+    id = Column(Integer, primary_key=True)
+    name = Column(String(50), unique=True)
+    roles = db.relationship('Role', secondary=role_permission, back_populates='permissions')
+
+    def __int__(self, name):
+        self.name = name
+
+
 class AnonymousUser(AnonymousUserMixin):
-    def can(self, permissions):
-        return False
 
     @staticmethod
-    def is_admin():
-        return False
+    def has_permission(permission_name):
+        from app.Permission import anonymous_role
+        role = Role.query.filter_by(name=anonymous_role.name).first()
+        return [perm for perm in role.permissions if perm.name == permission_name]

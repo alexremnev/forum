@@ -19,9 +19,11 @@
                        href="{{ url_for('profile', username=current_user.username) }}">Profile</a>
                 </li>
             {% endif %}
-            <li class="nav-item">
-                <a class="nav-link disabled" href="/admin">Admin</a>
-            </li>
+            {% if current_user.has_permission('admin') %}
+                <li class="nav-item">
+                    <a class="nav-link disabled" href="/admin">Admin</a>
+                </li>
+            {% endif %}
         </ul>
         <form class="form-inline my-2 my-lg-0" method="get" action="/posts">
             <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search" name="search">

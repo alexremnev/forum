@@ -5,7 +5,6 @@ from flask_login import current_user
 from passlib.handlers.sha2_crypt import sha256_crypt
 
 from app import login
-from app.Permission import Permission
 from app.models import User, Post
 
 
@@ -22,11 +21,11 @@ def load_user(id):
     return User.query.get(int(id))
 
 
-def permission_required(permission):
+def permission_required(permission_name):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            if not current_user.can(permission):
+            if not current_user.has_permission(permission_name):
                 flash('You don\'t have enough permissions', 'error')
                 return redirect(url_for('login'))
             return f(*args, **kwargs)
@@ -34,10 +33,6 @@ def permission_required(permission):
         return decorated_function
 
     return decorator
-
-
-def admin_required(f):
-    return permission_required(Permission.ADMINISTER)(f)
 
 
 def is_unique_post_title(title):

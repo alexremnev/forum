@@ -1,28 +1,22 @@
 from app import db
 from app.business import encrypt_password
-from app.models import Role, User
+from app.models import User, Role, Permission
 import sys
-from app.Permission import Permission
+from app.Permission import admin_role, role_permission, admin_permissions
 
 
-def insert_roles():
-    roles = {
-        'user': (
-            Permission.FOLLOW |
-            Permission.COMMENT |
-            Permission.WRITE_ARTICLE, True),
-        'moderator': (
-            Permission.FOLLOW |
-            Permission.COMMENT |
-            Permission.WRITE_ARTICLE |
-            Permission.MODERATE_COMMENTS, False),
-        'admin': (0xff, False)
-    }
-    for r in roles:
-        role = Role.query.filter_by(name=r).first()
-        if role is None:
-            role = Role(name=r)
-        role.permissions = roles[r][0]
+def set_admin_permissions():
+    admin_role.permissions = [Permission(name=p) for p in admin_permissions]
+    db.session.add(admin_role)
+    db.session.commit()
+
+
+def insert_roles_and_permissions():
+    all_perm = Permission.query.all()
+
+    for (role, permissions) in role_permission.items():
+        role_perm = [p for p in all_perm if p.name in permissions]
+        role.permissions = role_perm
         db.session.add(role)
 
 
@@ -32,12 +26,9 @@ for arg in [sys.argv]:
         email = arg[2]
         password = arg[3]
         db.create_all()
-        roles = ['user', 'admin', 'moderator']
-        for name in roles:
-            new_role = Role(name=name)
-            db.session.add(new_role)
-        insert_roles()
-        admin_role = Role.query.filter_by(name='admin').first()
+        set_admin_permissions()
+        insert_roles_and_permissions()
+        admin_role = Role.query.filter_by(name=admin_role.name).first()
         admin = User(username=username, email=email, password=encrypt_password(password), role=admin_role)
         db.session.add(admin)
         db.session.commit()
