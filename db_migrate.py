@@ -6,8 +6,5 @@ alembic = Alembic()
 alembic.init_app(app)
 
 with app.app_context():
-    # don't tuch import below!!!
-    from app import models
-
     alembic.revision('added permission table')
     alembic.upgrade()

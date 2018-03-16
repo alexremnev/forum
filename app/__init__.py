@@ -2,6 +2,8 @@ from flask import Flask
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 
+# import logging
+
 # logging.basicConfig()
 # logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
@@ -12,8 +14,10 @@ db = SQLAlchemy(app)
 login = LoginManager(app)
 login.login_view = 'login'
 
-from app.models import AnonymousUser
+from app.models.user import AnonymousUser
+
 login.anonymous_user = AnonymousUser
 
-from app import models, errors
+from app import errors
+from app.models import *
 from app.views import post, profile, admin, about, register, index

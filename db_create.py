@@ -1,8 +1,9 @@
 from app import db
-from app.business import encrypt_password
-from app.models import User, Role, Permission
+from app.services.crypto_service import CryptoEngine
+from app.models.role_permission import Role, Permission
+from app.models.user import User
 import sys
-from app.Permission import admin_role, role_permission, admin_permissions
+from app.Permission_const import admin_role, role_permission, admin_permissions
 
 
 def set_admin_permissions():
@@ -29,7 +30,8 @@ for arg in [sys.argv]:
         set_admin_permissions()
         insert_roles_and_permissions()
         admin_role = Role.query.filter_by(name=admin_role.name).first()
-        admin = User(username=username, email=email, password=encrypt_password(password), role=admin_role)
+        encrypt_password = CryptoEngine.encrypt_password(password)
+        admin = User(username=username, email=email, password=encrypt_password, role=admin_role)
         db.session.add(admin)
         db.session.commit()
     except Exception as exc:

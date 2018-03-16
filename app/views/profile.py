@@ -1,8 +1,9 @@
 from flask import render_template
 
 from app import app
-from app.business import permission_required
-from app.models import User, Post
+from app.views.utils import permission_required
+from app.models.user import User
+from app.models.post import Post
 
 
 @app.route('/profile/<username>')

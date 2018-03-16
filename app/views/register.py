@@ -2,21 +2,18 @@ from flask import render_template, flash, redirect, url_for, request
 from flask_login import login_user, logout_user
 from werkzeug.urls import url_parse
 
-from app import app, db
-from app.business import encrypt_password, verify_password, permission_required
+from app import app
+from app.views.utils import permission_required
 from app.forms import RegisterForm, LoginForm
-from app.models import User, Role
+from app.services import userService
 
 
 @app.route('/register', methods=['GET', 'POST'])
+@permission_required('register')
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
-        user_role = Role.query.filter_by(name='user').first()
-        new_user = User(username=form.username.data, email=form.email.data,
-                        password=(encrypt_password(form.password.data)), role=user_role)
-        db.session.add(new_user)
-        db.session.commit()
+        new_user = userService.add(form.username.data, form.email.data, form.password.data)
         login_user(new_user)
         flash('You are now registered', 'success')
         return redirect(url_for('index'))
@@ -24,13 +21,14 @@ def register():
 
 
 @app.route('/login', methods=['GET', 'POST'])
+@permission_required('login')
 def login():
     form = LoginForm()
     error = None
     if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
+        user = userService.get_by_username(form.username.data)
         if user:
-            if verify_password(form.password.data, user.password):
+            if userService.check_password(form.password.data, user):
                 login_user(user, remember=form.remember.data)
                 flash('You were successfully logged in', 'success')
                 next_page = request.args.get('next')

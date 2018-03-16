@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, TextAreaField
 from wtforms.validators import InputRequired, Length, Email, DataRequired
 
-from app.models import User, Post
+from app.services import userService
 
 
 class LoginForm(FlaskForm):
@@ -22,12 +22,12 @@ class RegisterForm(FlaskForm):
         if not form:
             return False
 
-        user = User.query.filter_by(username=self.username.data).first()
+        user = userService.get_by_username(self.username.data)
         if user is not None:
             self.username.errors.append('Nickname already exists')
             return False
 
-        user = User.query.filter_by(email=self.email.data).first()
+        user = userService.get_by_email(self.email.data)
         if user is not None:
             self.email.errors.append('Email already exists')
             return False
@@ -40,4 +40,4 @@ class PostForm(FlaskForm):
 
 
 class CommentForm(FlaskForm):
-    text = StringField('text', validators=[InputRequired(), Length(min=1, max=200)])
+    text = StringField('text:', validators=[InputRequired(), Length(min=1, max=200)])
