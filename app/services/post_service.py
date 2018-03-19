@@ -1,3 +1,5 @@
+from sqlalchemy import func
+
 from app.models.post import Post
 
 
@@ -6,11 +8,18 @@ class PostService:
     def __init__(self, session):
         self.session = session
 
-    def list(self, search):
+    def list(self, search, page, page_size):
         query = self.session.query(Post)
         if search is not None and len(search) > 2:
             query = query.filter(Post.title.like("%{0}%".format(search)))
-        return query.all()
+        offset = (page-1) * page_size
+        return query.limit(page_size).offset(offset).all()
+
+    def count(self, search):
+        query = self.session.query(func.count(Post.id))
+        if search is not None and len(search) > 2:
+            query = query.filter(Post.title.like("%{0}%".format(search)))
+        return query.scalar()
 
     def get(self, id):
         return self.session.query(Post).get(id)
