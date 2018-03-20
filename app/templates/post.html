@@ -7,22 +7,25 @@
     <div>
         <h1>{{ post.body | safe }}</h1>
     </div>
-    <table class="table table-striped">
+    <table class="table table-striped" id="comments">
         <tr>
             <th>Comment №</th>
             <th>Author</th>
             <th>Added at</th>
             <th>Comment</th>
         </tr>
-        {% for comment in post.comments %}
+        <tbody>
+        {% for comment in post.comments[:page_size] %}
             <tr>
                 <td>{{ comment.id }}</td>
                 <td>{{ comment.author.username }}</td>
-                <td>{{ comment.timestamp }}</td>
+                <td>{{ comment.timestamp.strftime("%Y-%m-%d, %H:%M:%S") }}</td>
                 <td>{{ comment.text | safe }}</td>
             </tr>
         {% endfor %}
+        </tbody>
     </table>
+    <a href=# id=comment>Show more comments</a>
     {% if  not current_user.is_anonymous %}
         <form method="POST" action="">
             {{ form.csrf_token }}
@@ -32,4 +35,45 @@
             <p><input class="btn btn-primary" type="submit" value="Submit">
         </form>
     {% endif %}
+    <script type=text/javascript>
+        $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+
+        function addRow(id, username, timestamp, text) {
+            if (!document.getElementsByTagName) return;
+            tabBody = document.getElementsByTagName("tbody").item(1);
+            row = document.createElement("tr");
+            var id_cell = document.createElement("td");
+            var username_cell = document.createElement("td");
+            var timestamp_cell = document.createElement("td");
+            var text_cell = document.createElement("td");
+            var id = document.createTextNode(id);
+            var username = document.createTextNode(username);
+            var timestamp = document.createTextNode(timestamp);
+            var text = document.createTextNode(text);
+            id_cell.appendChild(id);
+            username_cell.appendChild(username);
+            timestamp_cell.appendChild(timestamp);
+            text_cell.appendChild(text);
+            row.appendChild(id_cell);
+            row.appendChild(username_cell);
+            row.appendChild(timestamp_cell);
+            row.appendChild(text_cell);
+            tabBody.appendChild(row);
+        }
+
+        $(function () {
+            $('a#comment').bind('click', function () {
+                $.getJSON($SCRIPT_ROOT + '/_get_comments', {
+                    count: $('#comments tr').length - 1,
+                    post_id: {{ post.id }}
+                }, function (data) {
+                    var comments = data;
+                    for (var i = 0; i < comments.length; i++) {
+                        addRow(comments[i].id, comments[i].author, comments[i].timestamp, comments[i].text)
+                    }
+                });
+                return false;
+            });
+        });
+    </script>
 {% endblock %}

@@ -49,7 +49,7 @@ def post(id):
         flash('Comment Added', 'success')
 
     post = postService.get(id)
-    return render_template('post.html', post=post, form=form)
+    return render_template('post.html', post=post, form=form, page_size=app.config['PAGE_SIZE'])
 
 
 @app.route('/edit_post/<string:id>/', methods=['GET', 'POST'])

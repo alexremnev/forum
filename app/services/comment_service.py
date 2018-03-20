@@ -13,3 +13,7 @@ class CommentService:
                           post_id=post_id)
         self.session.add(comment)
         self.session.commit()
+
+    def list(self, post_id, offset, page_size):
+        return self.session.query(Comment).filter_by(post_id=post_id).limit(page_size) \
+            .offset(offset).all()
