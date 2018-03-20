@@ -5,8 +5,8 @@
         <h1> Welcome to my forum</h1>
         <p class="lead">This is my first application</p>
         {% if current_user.is_anonymous %}
-            <a href="/register" class="btn btn-primary btn-lg">Register</a>
-            <a href="/login" class="btn btn-success btn-lg">Login</a>
+            <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">Register</a>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-success btn-lg">Login</a>
         {% endif %}
     </div>
 {% endblock %}

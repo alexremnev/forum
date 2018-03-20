@@ -4,7 +4,7 @@ from flask import render_template, flash, redirect, url_for, request, current_ap
 from flask_login import current_user
 
 from app import app
-from app.views.utils import permission_required
+from app.auth.utils import permission_required
 from app.forms import PostForm, CommentForm
 from app.services import commentService, postService
 
@@ -67,7 +67,7 @@ def edit_post(id):
         form.body.data = post.body
         return render_template('edit_post.html', form=form)
     flash('You don\'t have enough permissions', 'error')
-    return redirect(url_for('login'))
+    return redirect(url_for('auth.login'))
 
 
 @app.route('/delete_post/<string:id>/', methods=['POST'])

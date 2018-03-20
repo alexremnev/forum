@@ -2,13 +2,13 @@ from flask import render_template, flash, redirect, url_for, request
 from flask_login import login_user, logout_user
 from werkzeug.urls import url_parse
 
-from app import app
-from app.views.utils import permission_required
-from app.forms import RegisterForm, LoginForm
+from app.auth import bp
+from app.auth.utils import permission_required
+from app.auth.forms import LoginForm, RegisterForm
 from app.services import userService
 
 
-@app.route('/register', methods=['GET', 'POST'])
+@bp.route('/register', methods=['GET', 'POST'])
 @permission_required('register')
 def register():
     form = RegisterForm()
@@ -17,10 +17,10 @@ def register():
         login_user(new_user)
         flash('You are now registered', 'success')
         return redirect(url_for('index'))
-    return render_template('register.html', form=form)
+    return render_template('auth/register.html', form=form)
 
 
-@app.route('/login', methods=['GET', 'POST'])
+@bp.route('/login', methods=['GET', 'POST'])
 @permission_required('login')
 def login():
     form = LoginForm()
@@ -37,12 +37,12 @@ def login():
                 return redirect(next_page)
         else:
             error = 'Invalid username or password'
-    return render_template('login.html', form=form, error=error)
+    return render_template('auth/login.html', form=form, error=error)
 
 
-@app.route('/logout')
+@bp.route('/logout')
 @permission_required('logout')
 def logout():
     logout_user()
     flash('You are now logged out', 'success')
-    return redirect(url_for('login'))
+    return redirect(url_for('auth.login'))

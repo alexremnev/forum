@@ -3,7 +3,7 @@ from flask import render_template, flash, redirect, url_for, request
 from app import app
 from app.services import userService
 from app.services import roleService
-from app.views.utils import permission_required
+from app.auth.utils import permission_required
 
 
 @app.route('/admin', methods=['GET', 'POST'])

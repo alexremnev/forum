@@ -13,14 +13,15 @@ app.config.from_object(Config)
 db = SQLAlchemy(app)
 
 login = LoginManager(app)
-login.login_view = 'login'
-
-from app.errors import bp as errors_bp
-app.register_blueprint(errors_bp)
-
 from app.models.user import AnonymousUser
 
 login.anonymous_user = AnonymousUser
 
+from app.errors import bp as errors_bp
+app.register_blueprint(errors_bp)
+
+from app.auth import bp as auth_bp
+app.register_blueprint(auth_bp, url_prefix='/auth')
+
 from app.models import *
-from app.views import post, profile, admin, about, register, index, comment
+from app.views import post, profile, admin, about, index, comment

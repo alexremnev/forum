@@ -1,7 +1,7 @@
 from flask import render_template
 
 from app import app
-from app.views.utils import permission_required
+from app.auth.utils import permission_required
 from app.models.user import User
 from app.models.post import Post
 

@@ -13,7 +13,7 @@ def permission_required(permission_name):
         def decorated_function(*args, **kwargs):
             if not current_user.has_permission(permission_name):
                 flash('You don\'t have enough permissions', 'error')
-                return redirect(url_for('login'))
+                return redirect(url_for('auth.login'))
             return f(*args, **kwargs)
 
         return decorated_function
