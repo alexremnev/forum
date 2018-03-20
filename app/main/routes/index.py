@@ -1,9 +1,9 @@
 from flask import render_template
 
-from app import app
+from app.main import bp
 
 
-@app.route('/')
-@app.route('/index')
+@bp.route('/')
+@bp.route('/index')
 def index():
     return render_template('home.html')

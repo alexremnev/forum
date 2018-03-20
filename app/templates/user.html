@@ -16,7 +16,7 @@
                 <td>{{ post.author.username }} says:<br>{{ post.body | safe }}</td>
             </tr>
         </table>
-        <a href="{{ url_for('edit_post', id=post.id) }}" class="btn btn-primary pull-right">Edit</a>
+        <a href="{{ url_for('main.edit_post', id=post.id) }}" class="btn btn-primary pull-right">Edit</a>
         </p>
     {% endfor %}
 {% endblock %}

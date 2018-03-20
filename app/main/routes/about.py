@@ -1,8 +1,8 @@
 from flask import render_template
 
-from app import app
+from app.main import bp
 
 
-@app.route('/about')
+@bp.route('/about')
 def about():
     return render_template('about.html')

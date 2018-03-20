@@ -16,7 +16,7 @@ def register():
         new_user = userService.add(form.username.data, form.email.data, form.password.data)
         login_user(new_user)
         flash('You are now registered', 'success')
-        return redirect(url_for('index'))
+        return redirect(url_for('main.index'))
     return render_template('auth/register.html', form=form)
 
 
@@ -33,7 +33,7 @@ def login():
                 flash('You were successfully logged in', 'success')
                 next_page = request.args.get('next')
                 if not next_page or url_parse(next_page).netloc != '':
-                    next_page = url_for('index')
+                    next_page = url_for('main.index')
                 return redirect(next_page)
         else:
             error = 'Invalid username or password'
