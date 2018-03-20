@@ -15,10 +15,12 @@ db = SQLAlchemy(app)
 login = LoginManager(app)
 login.login_view = 'login'
 
+from app.errors import bp as errors_bp
+app.register_blueprint(errors_bp)
+
 from app.models.user import AnonymousUser
 
 login.anonymous_user = AnonymousUser
 
-from app import errors
 from app.models import *
 from app.views import post, profile, admin, about, register, index, comment
