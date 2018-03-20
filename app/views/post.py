@@ -1,6 +1,6 @@
 import math
 
-from flask import render_template, flash, redirect, url_for, request
+from flask import render_template, flash, redirect, url_for, request, current_app
 from flask_login import current_user
 
 from app import app
@@ -14,7 +14,7 @@ from app.services import commentService, postService
 def posts():
     search = request.args.get('search')
     page = request.args.get('page', 1, type=int)
-    page_size = app.config['PAGE_SIZE']
+    page_size = current_app.config['POST_PER_PAGE']
     posts = postService.list(search=search, page=page, page_size=page_size)
     count = postService.count(search=search)
 
@@ -49,7 +49,7 @@ def post(id):
         flash('Comment Added', 'success')
 
     post = postService.get(id)
-    return render_template('post.html', post=post, form=form, page_size=app.config['PAGE_SIZE'])
+    return render_template('post.html', post=post, form=form, comment_per_page=current_app.config['COMMENT_PER_PAGE'])
 
 
 @app.route('/edit_post/<string:id>/', methods=['GET', 'POST'])

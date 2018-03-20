@@ -15,7 +15,7 @@
             <th>Comment</th>
         </tr>
         <tbody>
-        {% for comment in post.comments[:page_size] %}
+        {% for comment in post.comments[:comment_per_page] %}
             <tr>
                 <td>{{ comment.id }}</td>
                 <td>{{ comment.author.username }}</td>

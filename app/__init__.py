@@ -6,9 +6,10 @@ from flask_sqlalchemy import SQLAlchemy
 
 # logging.basicConfig()
 # logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+from config import Config
 
 app = Flask(__name__)
-app.config.from_object('config')
+app.config.from_object(Config)
 db = SQLAlchemy(app)
 
 login = LoginManager(app)
