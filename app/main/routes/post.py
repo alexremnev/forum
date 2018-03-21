@@ -33,7 +33,7 @@ def add_post():
     error = None
     if form.validate_on_submit():
         title = form.title.data
-        if postService.is_unique_post_title(title):
+        if postService.is_unique_title(title):
             postService.add(title, form.body.data, current_user)
             return redirect(url_for('main.posts'))
         error = 'Title must be unique'
@@ -59,7 +59,7 @@ def edit_post(id):
             or current_user.role.name in ['admin', 'moderator']:
         form = PostForm()
         if form.validate_on_submit():
-            postService.update(id, form.title.data, form.body.data, current_user.id)
+            postService.update(id, title=form.title.data, body=form.body.data, user_id=current_user.id)
             flash('Post Updated', 'success')
             return redirect(url_for('main.posts'))
         post = postService.get(id)

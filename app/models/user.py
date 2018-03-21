@@ -19,7 +19,6 @@ class User(db.Model, UserMixin):
     username = Column(String(30), unique=True)
     email = Column(String(50), unique=True)
     password = Column(String(100))
-    password1 = Column(String(100))
     role_id = Column(Integer, db.ForeignKey('role.id'))
     role = db.relationship('Role')
     posts = db.relationship('Post', backref='author', lazy='dynamic')

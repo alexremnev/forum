@@ -17,6 +17,6 @@ def admin():
 @permission_required('admin')
 def assign(id):
     role_id = request.form.get('assign')
-    userService.update_role(id, role_id)
+    userService.update_role(id, role_id=role_id)
     flash('Role changed', 'success')
     return redirect(url_for('main.admin'))

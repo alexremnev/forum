@@ -29,8 +29,8 @@ class UserService:
         self.session.commit()
         return new_user
 
-    def update_role(self, user_id, role_id):
-        self.session.query(User).filter_by(id=user_id).update({'role_id': role_id})
+    def update_role(self, user_id, **kwargs):
+        self.session.query(User).filter_by(id=user_id).update(kwargs)
         self.session.commit()
 
     @staticmethod

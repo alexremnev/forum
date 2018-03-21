@@ -32,14 +32,14 @@ class PostService:
         self.session.add(post)
         self.session.commit()
 
-    def update(self, post_id, title, body, user_id):
-        self.session.query(Post).filter_by(id=post_id).update({'title': title, 'body': body, 'user_id': user_id})
+    def update(self, post_id, **kwargs):
+        self.session.query(Post).filter_by(id=post_id).update(kwargs)
         self.session.commit()
 
     def delete(self, post_id):
         self.session.query(Post).filter_by(id=post_id).delete()
         self.session.commit()
 
-    def is_unique_post_title(self, title):
+    def is_unique_title(self, title):
         post = self.session.query(Post).filter_by(title=title).first()
         return not post
