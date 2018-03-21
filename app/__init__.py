@@ -7,26 +7,33 @@ from flask_sqlalchemy import SQLAlchemy
 
 # logging.basicConfig()
 # logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
-from config import Config
+from config import DevelopmentConfig
 
-app = Flask(__name__)
-app.config.from_object(Config)
-db = SQLAlchemy(app)
-
-alembic = Alembic(app)
-
-login = LoginManager(app)
+db = SQLAlchemy()
+alembic = Alembic()
+login = LoginManager()
 from app.models.user import AnonymousUser
 
 login.anonymous_user = AnonymousUser
 
-from app.errors import bp as errors_bp
-app.register_blueprint(errors_bp)
 
-from app.auth import bp as auth_bp
-app.register_blueprint(auth_bp, url_prefix='/auth')
+def create_app(config_class=DevelopmentConfig):
+    app = Flask(__name__)
+    app.config.from_object(config_class)
+    db.init_app(app)
+    alembic.init_app(app)
+    login.init_app(app)
 
-from app.main import bp as main_bp
-app.register_blueprint(main_bp)
+    from app.errors import bp as errors_bp
+    app.register_blueprint(errors_bp)
+
+    from app.auth import bp as auth_bp
+    app.register_blueprint(auth_bp, url_prefix='/auth')
+
+    from app.main import bp as main_bp
+    app.register_blueprint(main_bp)
+
+    return app
+
 
 from app.models import *
