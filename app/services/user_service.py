@@ -1,6 +1,7 @@
 from app.Permission_const import user_role_name
 from app.models.user import User
 from app.services.crypto_service import CryptoEngine
+from app.services.utils import commit_required
 
 
 class UserService:
@@ -21,6 +22,7 @@ class UserService:
     def list(self):
         return self.session.query(User).all()
 
+    @commit_required
     def add(self, username, email, password):
         user_role = self.roleService.get_by_name(user_role_name)
         encrypted_password = CryptoEngine.encrypt_password(password)
@@ -29,6 +31,7 @@ class UserService:
         self.session.commit()
         return new_user
 
+    @commit_required
     def update_role(self, user_id, **kwargs):
         self.session.query(User).filter_by(id=user_id).update(kwargs)
         self.session.commit()

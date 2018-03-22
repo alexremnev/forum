@@ -1,6 +1,7 @@
 from sqlalchemy import func
 
 from app.models.post import Post
+from app.services.utils import commit_required
 
 
 class PostService:
@@ -27,15 +28,16 @@ class PostService:
     def get_by_user_id(self, id, user_id):
         return self.session.query(Post).filter_by(id=id, user_id=user_id).first()
 
+    @commit_required
     def add(self, title, body, user):
         post = Post(title=title, body=body, author=user)
         self.session.add(post)
-        self.session.commit()
 
+    @commit_required
     def update(self, post_id, **kwargs):
         self.session.query(Post).filter_by(id=post_id).update(kwargs)
-        self.session.commit()
 
+    @commit_required
     def delete(self, post_id):
         self.session.query(Post).filter_by(id=post_id).delete()
         self.session.commit()
