@@ -1,4 +1,4 @@
-from app import db
+from app import db, create_app
 from app.services.crypto_service import CryptoEngine
 from app.models.role_permission import Role, Permission
 from app.models.user import User
@@ -26,6 +26,8 @@ for arg in [sys.argv]:
         username = arg[1]
         email = arg[2]
         password = arg[3]
+        app = create_app()
+        app.app_context().push()
         db.create_all()
         set_admin_permissions()
         insert_roles_and_permissions()

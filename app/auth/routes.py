@@ -27,8 +27,7 @@ def login():
     error = None
     if form.validate_on_submit():
         user = userService.get_by_username(form.username.data)
-        if user:
-            if userService.check_password(form.password.data, user):
+        if user and userService.check_password(form.password.data, user):
                 login_user(user, remember=form.remember.data)
                 flash('You were successfully logged in', 'success')
                 next_page = request.args.get('next')
