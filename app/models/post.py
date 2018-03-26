@@ -8,4 +8,4 @@ class Post(db.Model):
     title = Column(String(50), unique=True)
     body = Column(String)
     user_id = Column(Integer, db.ForeignKey('user.id'))
-    comments = db.relationship('Comment', backref='post', lazy='dynamic')
+    comments = db.relationship('Comment', backref='post', lazy='subquery')

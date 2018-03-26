@@ -22,7 +22,6 @@ class UserService:
     def list(self):
         return self.session.query(User).all()
 
-    @commit_required
     def add(self, username, email, password):
         user_role = self.roleService.get_by_name(user_role_name)
         encrypted_password = CryptoEngine.encrypt_password(password)
@@ -34,7 +33,6 @@ class UserService:
     @commit_required
     def update_role(self, user_id, **kwargs):
         self.session.query(User).filter_by(id=user_id).update(kwargs)
-        self.session.commit()
 
     @staticmethod
     def check_password(password, user):

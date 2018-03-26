@@ -1,5 +1,6 @@
 import datetime
 
+from app import cache
 from app.models.comment import Comment
 from app.services.utils import commit_required
 
@@ -15,6 +16,7 @@ class CommentService:
                           post_id=post_id)
         self.session.add(comment)
 
+    @cache.cached(timeout=3)
     def list(self, post_id, offset, page_size):
         return self.session.query(Comment).filter_by(post_id=post_id).limit(page_size) \
             .offset(offset).all()

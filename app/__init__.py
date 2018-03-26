@@ -1,5 +1,7 @@
 from flask import Flask
 from flask_alembic import Alembic
+from flask_caching import Cache
+from flask_compress import Compress
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 
@@ -12,6 +14,8 @@ from config import DevelopmentConfig
 db = SQLAlchemy()
 alembic = Alembic()
 login = LoginManager()
+cache = Cache()
+compress = Compress()
 from app.models.user import AnonymousUser
 
 login.anonymous_user = AnonymousUser
@@ -20,6 +24,8 @@ login.anonymous_user = AnonymousUser
 def create_app(config_class=DevelopmentConfig):
     app = Flask(__name__)
     app.config.from_object(config_class)
+    cache.init_app(app)
+    compress.init_app(app)
     db.init_app(app)
     alembic.init_app(app)
     login.init_app(app)

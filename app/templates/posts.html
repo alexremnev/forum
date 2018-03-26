@@ -18,7 +18,7 @@
                 <td><a href="post/{{ post.id }}">{{ post.title | safe }}</a></td>
                 <td>{{ post.author.username }}</td>
                 <td>{{ post.body | safe }}</td>
-                <td>{{ post.comments.count() }}</td>
+                <td>{{ post.comments | length }}</td>
                 <td>
                     {% if not current_user.is_anonymous and ((post in current_user.posts)) or current_user.has_permission('edit_any_post') %}
                         <a href="edit_post/{{ post.id }}" class="btn btn-default pull-right">Edit</a>
