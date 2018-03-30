@@ -3,6 +3,7 @@ import math
 from flask import render_template, flash, redirect, url_for, request, current_app
 from flask_login import current_user
 
+from app.Permission_const import moderator_role_name, admin_role_name
 from app.main import bp
 from app.auth.utils import permission_required
 from app.main.forms import PostForm, CommentForm
@@ -55,8 +56,8 @@ def post(id):
 @bp.route('/edit_post/<string:id>/', methods=['GET', 'POST'])
 @permission_required('edit_post')
 def edit_post(id):
-    if (postService.get_by_user_id(id, current_user.id) is not None) \
-            or current_user.role.name in ['admin', 'moderator']:
+    if [p for p in current_user.posts if str(p.id) == id] or (
+            current_user.role.name in [admin_role_name, moderator_role_name]):
         form = PostForm()
         if form.validate_on_submit():
             postService.update(id, title=form.title.data, body=form.body.data, user_id=current_user.id)

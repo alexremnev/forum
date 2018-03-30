@@ -1,7 +1,6 @@
 from hashlib import md5
 
-from flask_login import AnonymousUserMixin
-from flask_security import UserMixin
+from flask_login import AnonymousUserMixin, UserMixin
 from sqlalchemy import Column, Integer, String
 
 from app import db
@@ -23,10 +22,6 @@ class User(db.Model, UserMixin):
     role = db.relationship('Role')
     posts = db.relationship('Post', backref='author', lazy='dynamic')
     comments = db.relationship('Comment', backref='author', lazy='dynamic')
-
-    @property
-    def is_active(self):
-        return True
 
     def has_permission(self, permission_name):
         return [perm for perm in self.role.permissions if perm.name == permission_name]
